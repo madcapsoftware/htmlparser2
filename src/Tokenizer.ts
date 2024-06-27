@@ -392,6 +392,15 @@ export default class Tokenizer {
             this.state = State.InProcessingInstruction;
             this.sectionStart = this.index + 1;
         } else if (this.isTagStartChar(c)) {
+            if (
+                this.strictMode &&
+                (c === CharCodes.Lt || c === CharCodes.Amp)
+            ) {
+                throw new Error(
+                    `Element name cannot include '${String.fromCharCode(c)}'`,
+                );
+            }
+
             const lower = c | 0x20;
             this.sectionStart = this.index;
             if (this.xmlMode) {
@@ -411,6 +420,12 @@ export default class Tokenizer {
         }
     }
     private stateInTagName(c: number): void {
+        if (this.strictMode && (c === CharCodes.Lt || c === CharCodes.Amp)) {
+            throw new Error(
+                `Element name cannot include '${String.fromCharCode(c)}'`,
+            );
+        }
+
         if (isEndOfTagSection(c)) {
             this.cbs.onopentagname(this.sectionStart, this.index);
             this.sectionStart = -1;

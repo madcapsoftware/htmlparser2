@@ -120,6 +120,50 @@ describe("Tokenizer", () => {
     });
 
     describe("strict mode", () => {
+        describe("should throw on invalid tag name", () => {
+            it("for lt as name", () => {
+                expect(() =>
+                    tokenize("<<></<>", { strictMode: true, xmlMode: true }),
+                ).toThrowError("Element name cannot include '<'");
+            });
+            it("for & at start of name", () => {
+                expect(() =>
+                    tokenize("<<a></<a>", { strictMode: true, xmlMode: true }),
+                ).toThrowError("Element name cannot include '<'");
+            });
+            it("for & inside of name", () => {
+                expect(() =>
+                    tokenize("<a<a></a<a>", { strictMode: true }),
+                ).toThrowError("Element name cannot include '<'");
+            });
+            it("for & at end of name", () => {
+                expect(() =>
+                    tokenize("<aa<></aa<>", { strictMode: true }),
+                ).toThrowError("Element name cannot include '<'");
+            });
+
+            it("for lt as name", () => {
+                expect(() =>
+                    tokenize("<&></&>", { strictMode: true, xmlMode: true }),
+                ).toThrowError("Element name cannot include '&'");
+            });
+            it("for lt at start of name", () => {
+                expect(() =>
+                    tokenize("<&a></&a>", { strictMode: true, xmlMode: true }),
+                ).toThrowError("Element name cannot include '&'");
+            });
+            it("for lt inside of name", () => {
+                expect(() =>
+                    tokenize("<a&a></a&a>", { strictMode: true }),
+                ).toThrowError("Element name cannot include '&'");
+            });
+            it("for lt at end of name", () => {
+                expect(() =>
+                    tokenize("<aa&></aa&>", { strictMode: true }),
+                ).toThrowError("Element name cannot include '&'");
+            });
+        });
+
         describe("should throw on invalid attribute", () => {
             it("for no value", () => {
                 expect(() =>
