@@ -113,6 +113,23 @@ export interface ParserOptions {
     xmlMode?: boolean;
 
     /**
+     * Indicates whether an error is thrown when attributes are not valid xml syntax or when a tag is not closed.
+     * Invalid attribute syntax that will throw include:
+     * ```html
+     * <div attr></div>
+     * <div attr=></div>
+     * <div attr=val></div>
+     * <div attr="val></div>
+     * <div attr='val></div>
+     * <div attr=val"></div>
+     * <div attr=val'></div>
+     * ```
+     *
+     * @default false
+     */
+    strictMode?: boolean;
+
+    /**
      * Decode entities within the document.
      *
      * @default true
@@ -220,6 +237,8 @@ export class Parser implements Callbacks {
     private readonly recognizeSelfClosing: boolean;
     /** We are parsing HTML. Inverse of the `xmlMode` option. */
     private readonly htmlMode: boolean;
+    /** We are throwing errors for invalid atttributes and missing close tags. */
+    private readonly strictMode: boolean;
     private readonly tokenizer: Tokenizer;
 
     private readonly buffers: string[] = [];
@@ -235,6 +254,7 @@ export class Parser implements Callbacks {
     ) {
         this.cbs = cbs ?? {};
         this.htmlMode = !this.options.xmlMode;
+        this.strictMode = this.options.strictMode ?? false;
         this.lowerCaseTagNames = options.lowerCaseTags ?? this.htmlMode;
         this.lowerCaseAttributeNames =
             options.lowerCaseAttributeNames ?? this.htmlMode;
@@ -294,6 +314,9 @@ export class Parser implements Callbacks {
 
         if (impliesClose) {
             while (this.stack.length > 0 && impliesClose.has(this.stack[0])) {
+                if (this.strictMode) {
+                    throw new Error("Closing tag is missing");
+                }
                 const element = this.stack.shift()!;
                 this.cbs.onclosetag?.(element, true);
             }
@@ -313,14 +336,19 @@ export class Parser implements Callbacks {
         if (this.cbs.onopentag) this.attribs = {};
     }
 
-    private endOpenTag(isImplied: boolean) {
+    private endOpenTag(isImplied: boolean, isSelfClosing: boolean) {
         this.startIndex = this.openTagStart;
+
+        const isVoid = this.isVoidElement(this.tagname);
+        if (this.strictMode && isVoid && !isSelfClosing) {
+            throw new Error("Closing tag is missing");
+        }
 
         if (this.attribs) {
             this.cbs.onopentag?.(this.tagname, this.attribs, isImplied);
             this.attribs = null;
         }
-        if (this.cbs.onclosetag && this.isVoidElement(this.tagname)) {
+        if (this.cbs.onclosetag && isVoid) {
             this.cbs.onclosetag(this.tagname, true);
         }
 
@@ -330,7 +358,7 @@ export class Parser implements Callbacks {
     /** @internal */
     onopentagend(endIndex: number): void {
         this.endIndex = endIndex;
-        this.endOpenTag(false);
+        this.endOpenTag(false, false);
 
         // Set `startIndex` for next node
         this.startIndex = endIndex + 1;
@@ -358,6 +386,10 @@ export class Parser implements Callbacks {
             const pos = this.stack.indexOf(name);
             if (pos !== -1) {
                 for (let index = 0; index <= pos; index++) {
+                    if (this.strictMode && index !== pos) {
+                        throw new Error("Closing tag is missing");
+                    }
+
                     const element = this.stack.shift()!;
                     // We know the stack has sufficient elements.
                     this.cbs.onclosetag?.(element, index !== pos);
@@ -365,7 +397,7 @@ export class Parser implements Callbacks {
             } else if (this.htmlMode && name === "p") {
                 // Implicit open before close
                 this.emitOpenTag("p");
-                this.closeCurrentTag(true);
+                this.closeCurrentTag(true, false);
             }
         } else if (this.htmlMode && name === "br") {
             // We can't use `emitOpenTag` for implicit open, as `br` would be implicitly closed.
@@ -382,7 +414,7 @@ export class Parser implements Callbacks {
     onselfclosingtag(endIndex: number): void {
         this.endIndex = endIndex;
         if (this.recognizeSelfClosing || this.foreignContext[0]) {
-            this.closeCurrentTag(false);
+            this.closeCurrentTag(false, true);
 
             // Set `startIndex` for next node
             this.startIndex = endIndex + 1;
@@ -392,9 +424,9 @@ export class Parser implements Callbacks {
         }
     }
 
-    private closeCurrentTag(isOpenImplied: boolean) {
+    private closeCurrentTag(isOpenImplied: boolean, isSelfClosing: boolean) {
         const name = this.tagname;
-        this.endOpenTag(isOpenImplied);
+        this.endOpenTag(isOpenImplied, isSelfClosing);
 
         // Self-closing tags will be on the top of the stack
         if (this.stack[0] === name) {
@@ -519,6 +551,10 @@ export class Parser implements Callbacks {
 
     /** @internal */
     onend(): void {
+        if (this.strictMode && this.stack.length > 0) {
+            throw new Error("Closing tag is missing");
+        }
+
         if (this.cbs.onclosetag) {
             // Set the end index for all remaining tags
             this.endIndex = this.startIndex;

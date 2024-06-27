@@ -119,6 +119,36 @@ describe("Tokenizer", () => {
             expect(tokenize("&NotGreaterFullEqual;")).toMatchSnapshot());
     });
 
+    describe("strict mode", () => {
+        describe("should throw on invalid attribute", () => {
+            it("for no value", () => {
+                expect(() =>
+                    tokenize("<div aaa >", { strictMode: true }),
+                ).toThrowError("Attribute value is missing");
+            });
+            it("for no value with equals sign", () => {
+                expect(() =>
+                    tokenize("<div aaa= >", { strictMode: true }),
+                ).toThrowError("Attribute value must be in quotes");
+            });
+            it("for no quotes around a value", () => {
+                expect(() =>
+                    tokenize("<div aaa=aaa >", { strictMode: true }),
+                ).toThrowError("Attribute value must be in quotes");
+            });
+            it("for no opening quote around a value", () => {
+                expect(() =>
+                    tokenize("<div aaa=aaa' >", { strictMode: true }),
+                ).toThrowError("Attribute value must be in quotes");
+            });
+            it("for no closing quote around a value", () => {
+                expect(() =>
+                    tokenize("<div aaa='aaa >", { strictMode: true }),
+                ).toThrowError("Attribute value must be in quotes");
+            });
+        });
+    });
+
     it("should not lose data when pausing", () => {
         const log: unknown[][] = [];
         const tokenizer = new Tokenizer(

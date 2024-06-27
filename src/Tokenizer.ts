@@ -161,6 +161,7 @@ export default class Tokenizer {
     private offset = 0;
 
     private readonly xmlMode: boolean;
+    private readonly strictMode: boolean;
     private readonly decodeEntities: boolean;
     private readonly entityDecoder: EntityDecoder;
 
@@ -168,10 +169,16 @@ export default class Tokenizer {
         {
             xmlMode = false,
             decodeEntities = true,
-        }: { xmlMode?: boolean; decodeEntities?: boolean },
+            strictMode = false,
+        }: {
+            xmlMode?: boolean;
+            decodeEntities?: boolean;
+            strictMode?: boolean;
+        },
         private readonly cbs: Callbacks,
     ) {
         this.xmlMode = xmlMode;
+        this.strictMode = strictMode;
         this.decodeEntities = decodeEntities;
         this.entityDecoder = new EntityDecoder(
             xmlMode ? xmlDecodeTree : htmlDecodeTree,
@@ -477,6 +484,8 @@ export default class Tokenizer {
     private stateAfterAttributeName(c: number): void {
         if (c === CharCodes.Eq) {
             this.state = State.BeforeAttributeValue;
+        } else if (this.strictMode) {
+            throw new Error("Attribute value is missing");
         } else if (c === CharCodes.Slash || c === CharCodes.Gt) {
             this.cbs.onattribend(QuoteType.NoValue, this.sectionStart);
             this.sectionStart = -1;
@@ -495,6 +504,8 @@ export default class Tokenizer {
         } else if (c === CharCodes.SingleQuote) {
             this.state = State.InAttributeValueSq;
             this.sectionStart = this.index + 1;
+        } else if (this.strictMode) {
+            throw new Error("Attribute value must be in quotes");
         } else if (!isWhitespace(c)) {
             this.sectionStart = this.index;
             this.state = State.InAttributeValueNq;
@@ -517,6 +528,11 @@ export default class Tokenizer {
             this.state = State.BeforeAttributeName;
         } else if (this.decodeEntities && c === CharCodes.Amp) {
             this.startEntity();
+        } else if (
+            this.strictMode &&
+            (c === CharCodes.Slash || c === CharCodes.Gt)
+        ) {
+            throw new Error("Attribute value must be in quotes");
         }
     }
     private stateInAttributeValueDoubleQuotes(c: number): void {

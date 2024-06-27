@@ -161,4 +161,116 @@ describe("API", () => {
         );
         p.done();
     });
+
+    describe("should throw when missing a closing tag", () => {
+        it("for non-void tag", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+            });
+
+            expect(() => p.end("<div>")).toThrowError("Closing tag is missing");
+        });
+
+        it("for non-void tag not at end of markup", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+            });
+
+            expect(() => p.end("<div><h1></div>")).toThrowError(
+                "Closing tag is missing",
+            );
+        });
+
+        it("for void tag", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+            });
+
+            expect(() => p.end("<img>")).toThrowError("Closing tag is missing");
+        });
+
+        it("for void tag not at end of markup", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+            });
+
+            expect(() => p.end("<div><img></div>")).toThrowError(
+                "Closing tag is missing",
+            );
+        });
+
+        it("for br tag", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+            });
+
+            expect(() => p.end("<br>")).toThrowError("Closing tag is missing");
+        });
+
+        it("for br tag not at end of markup", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+            });
+
+            expect(() => p.end("<div><br></div>")).toThrowError(
+                "Closing tag is missing",
+            );
+        });
+    });
+
+    describe("should not throw for a self closing tag", () => {
+        it("for non-void tag", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+                recognizeSelfClosing: true,
+            });
+
+            expect(() => p.end("<div />")).not.toThrowError();
+        });
+
+        it("for non-void tag not at end of markup", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+                recognizeSelfClosing: true,
+            });
+
+            expect(() => p.end("<div><h1 /></div>")).not.toThrowError();
+        });
+
+        it("for void tag", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+                recognizeSelfClosing: true,
+            });
+
+            expect(() => p.end("<img />")).not.toThrowError();
+        });
+
+        it("for void tag not at end of markup", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+                recognizeSelfClosing: true,
+            });
+
+            expect(() => p.end("<div><img /></div>")).not.toThrowError();
+        });
+
+        it("for br tag", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+                recognizeSelfClosing: true,
+            });
+
+            expect(() => p.end("<br />")).not.toThrowError();
+        });
+
+        it("for br tag not at end of markup", () => {
+            const p = new Parser(null, {
+                strictMode: true,
+                recognizeSelfClosing: true,
+            });
+
+            expect(() => p.end("<div><br /></div>")).not.toThrowError();
+        });
+    });
 });
