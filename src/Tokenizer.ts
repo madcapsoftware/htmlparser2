@@ -460,6 +460,13 @@ export default class Tokenizer {
             this.sectionStart = this.index + 1;
         } else if (c === CharCodes.Slash) {
             this.state = State.InSelfClosingTag;
+        } else if (
+            this.strictMode &&
+            (c === CharCodes.Lt || c === CharCodes.Amp)
+        ) {
+            throw new Error(
+                `Attribute name cannot include '${String.fromCharCode(c)}'`,
+            );
         } else if (!isWhitespace(c)) {
             this.state = State.InAttributeName;
             this.sectionStart = this.index;
@@ -477,6 +484,12 @@ export default class Tokenizer {
         }
     }
     private stateInAttributeName(c: number): void {
+        if (this.strictMode && (c === CharCodes.Lt || c === CharCodes.Amp)) {
+            throw new Error(
+                `Attribute name cannot include '${String.fromCharCode(c)}'`,
+            );
+        }
+
         if (c === CharCodes.Eq || isEndOfTagSection(c)) {
             this.cbs.onattribname(this.sectionStart, this.index);
             this.sectionStart = this.index;

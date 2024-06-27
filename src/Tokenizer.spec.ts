@@ -148,6 +148,48 @@ describe("Tokenizer", () => {
                     "Unescaped '<' not allowed in attributes values",
                 );
             });
+
+            it("for lt as name", () => {
+                expect(() =>
+                    tokenize("<div <='aaa'></div>", { strictMode: true }),
+                ).toThrowError("Attribute name cannot include '<'");
+            });
+            it("for lt at start of name", () => {
+                expect(() =>
+                    tokenize("<div <aa='aaa'></div>", { strictMode: true }),
+                ).toThrowError("Attribute name cannot include '<'");
+            });
+            it("for lt inside of name", () => {
+                expect(() =>
+                    tokenize("<div a<a='aaa'></div>", { strictMode: true }),
+                ).toThrowError("Attribute name cannot include '<'");
+            });
+            it("for lt at end of name", () => {
+                expect(() =>
+                    tokenize("<div aa<='aaa'></div>", { strictMode: true }),
+                ).toThrowError("Attribute name cannot include '<'");
+            });
+
+            it("for & as name", () => {
+                expect(() =>
+                    tokenize("<div &='aaa'></div>", { strictMode: true }),
+                ).toThrowError("Attribute name cannot include '&'");
+            });
+            it("for & at start of name", () => {
+                expect(() =>
+                    tokenize("<div &aa='aaa'></div>", { strictMode: true }),
+                ).toThrowError("Attribute name cannot include '&'");
+            });
+            it("for & inside of name", () => {
+                expect(() =>
+                    tokenize("<div a&a='aaa'></div>", { strictMode: true }),
+                ).toThrowError("Attribute name cannot include '&'");
+            });
+            it("for & at end of name", () => {
+                expect(() =>
+                    tokenize("<div aa&='aaa'></div>", { strictMode: true }),
+                ).toThrowError("Attribute name cannot include '&'");
+            });
         });
 
         describe("should not throw on valid attribute", () => {
