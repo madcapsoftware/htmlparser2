@@ -431,7 +431,10 @@ export default class Tokenizer {
         }
     }
     private stateInClosingTagName(c: number): void {
-        if ((this.strictMode && c === CharCodes.Gt) || (!this.strictMode && (c === CharCodes.Gt || isWhitespace(c)))) {
+        if (
+            (this.strictMode && c === CharCodes.Gt) ||
+            (!this.strictMode && (c === CharCodes.Gt || isWhitespace(c)))
+        ) {
             this.cbs.onclosetag(this.sectionStart, this.index);
             this.sectionStart = -1;
             this.state = State.AfterClosingTagName;
@@ -528,11 +531,8 @@ export default class Tokenizer {
             this.state = State.BeforeAttributeName;
         } else if (this.decodeEntities && c === CharCodes.Amp) {
             this.startEntity();
-        } else if (
-            this.strictMode &&
-            (c === CharCodes.Slash || c === CharCodes.Gt)
-        ) {
-            throw new Error("Attribute value must be in quotes");
+        } else if (this.strictMode && c === CharCodes.Lt) {
+            throw new Error("Unescaped '<' not allowed in attributes values");
         }
     }
     private stateInAttributeValueDoubleQuotes(c: number): void {

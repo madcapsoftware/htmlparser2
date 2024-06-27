@@ -123,28 +123,44 @@ describe("Tokenizer", () => {
         describe("should throw on invalid attribute", () => {
             it("for no value", () => {
                 expect(() =>
-                    tokenize("<div aaa >", { strictMode: true }),
+                    tokenize("<div aaa ></div>", { strictMode: true }),
                 ).toThrowError("Attribute value is missing");
             });
             it("for no value with equals sign", () => {
                 expect(() =>
-                    tokenize("<div aaa= >", { strictMode: true }),
+                    tokenize("<div aaa= ></div>", { strictMode: true }),
                 ).toThrowError("Attribute value must be in quotes");
             });
             it("for no quotes around a value", () => {
                 expect(() =>
-                    tokenize("<div aaa=aaa >", { strictMode: true }),
+                    tokenize("<div aaa=aaa ></div>", { strictMode: true }),
                 ).toThrowError("Attribute value must be in quotes");
             });
             it("for no opening quote around a value", () => {
                 expect(() =>
-                    tokenize("<div aaa=aaa' >", { strictMode: true }),
+                    tokenize("<div aaa=aaa' ></div>", { strictMode: true }),
                 ).toThrowError("Attribute value must be in quotes");
             });
             it("for no closing quote around a value", () => {
                 expect(() =>
-                    tokenize("<div aaa='aaa >", { strictMode: true }),
-                ).toThrowError("Attribute value must be in quotes");
+                    tokenize("<div aaa='aaa ></div>", { strictMode: true }),
+                ).toThrowError(
+                    "Unescaped '<' not allowed in attributes values",
+                );
+            });
+        });
+
+        describe("should not throw on valid attribute", () => {
+            it("for closing slashes in value", () => {
+                expect(() =>
+                    tokenize("<div aaa='/a/a/' ></div>", { strictMode: true }),
+                ).not.toThrowError();
+            });
+
+            it("for gt in value", () => {
+                expect(() =>
+                    tokenize("<div aaa='>a>a>' ></div>", { strictMode: true }),
+                ).not.toThrowError();
             });
         });
     });

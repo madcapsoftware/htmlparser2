@@ -170,66 +170,82 @@ describe("API", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div>")).toThrowError("Closing tag is missing");
+
+                        expect(() => p.end("<div>")).toThrowError(
+                            "Closing tag is missing",
+                        );
                     });
-    
+
                     it("with closing tag with no name", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div></")).toThrowError("Closing tag is missing");
+
+                        expect(() => p.end("<div></")).toThrowError(
+                            "Closing tag is missing",
+                        );
                     });
-        
+
                     it("with closing tag with wrong name", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div></aaa>")).toThrowError("Closing tag is missing");
+
+                        expect(() => p.end("<div></aaa>")).toThrowError(
+                            "Closing tag is missing",
+                        );
                     });
-        
+
                     it("with closing tag missing gt", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div></div")).toThrowError("Closing tag is missing");
+
+                        expect(() => p.end("<div></div")).toThrowError(
+                            "Closing tag is missing",
+                        );
                     });
                 });
-    
+
                 describe("within valid parent", () => {
                     it("with only an opening tag", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div><h1></div>")).toThrowError("Closing tag is missing",);
+
+                        expect(() => p.end("<div><h1></div>")).toThrowError(
+                            "Closing tag is missing",
+                        );
                     });
-    
+
                     it("with closing tag with no name", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div><h1></</div>")).toThrowError("Closing tag is missing");
+
+                        expect(() => p.end("<div><h1></</div>")).toThrowError(
+                            "Closing tag is missing",
+                        );
                     });
-        
+
                     it("with closing tag with wrong name", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div><h1></aaa></div>")).toThrowError("Closing tag is missing");
+
+                        expect(() =>
+                            p.end("<div><h1></aaa></div>"),
+                        ).toThrowError("Closing tag is missing");
                     });
-        
+
                     it("with closing tag missing gt", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div><h1></h1</div>")).toThrowError("Closing tag is missing");
+
+                        expect(() => p.end("<div><h1></h1</div>")).toThrowError(
+                            "Closing tag is missing",
+                        );
                     });
                 });
             });
@@ -240,66 +256,82 @@ describe("API", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div> <h2></h2>")).toThrowError("Closing tag is missing");
+
+                        expect(() => p.end("<div> <h2></h2>")).toThrowError(
+                            "Closing tag is missing",
+                        );
                     });
-    
+
                     it("with closing tag with no name", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div></ <h2></h2>")).toThrowError("Closing tag is missing");
+
+                        expect(() => p.end("<div></ <h2></h2>")).toThrowError(
+                            "Closing tag is missing",
+                        );
                     });
-        
+
                     it("with closing tag with wrong name", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div></aaa> <h2></h2>")).toThrowError("Closing tag is missing");
+
+                        expect(() =>
+                            p.end("<div></aaa> <h2></h2>"),
+                        ).toThrowError("Closing tag is missing");
                     });
-        
+
                     it("with closing tag missing gt", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div></div <h2></h2>")).toThrowError("Closing tag is missing");
+
+                        expect(() =>
+                            p.end("<div></div <h2></h2>"),
+                        ).toThrowError("Closing tag is missing");
                     });
                 });
-    
+
                 describe("within valid parent", () => {
                     it("with only an opening tag", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div><h1> <h2></h2></div>")).toThrowError("Closing tag is missing",);
+
+                        expect(() =>
+                            p.end("<div><h1> <h2></h2></div>"),
+                        ).toThrowError("Closing tag is missing");
                     });
-    
+
                     it("with closing tag with no name", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div><h1></ <h2></h2></div>")).toThrowError("Closing tag is missing");
+
+                        expect(() =>
+                            p.end("<div><h1></ <h2></h2></div>"),
+                        ).toThrowError("Closing tag is missing");
                     });
-        
+
                     it("with closing tag with wrong name", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div><h1></aaa> <h2></h2></div>")).toThrowError("Closing tag is missing");
+
+                        expect(() =>
+                            p.end("<div><h1></aaa> <h2></h2></div>"),
+                        ).toThrowError("Closing tag is missing");
                     });
-        
+
                     it("with closing tag missing gt", () => {
                         const p = new Parser(null, {
                             strictMode: true,
                         });
-        
-                        expect(() => p.end("<div><h1></h1 <h2></h2></div>")).toThrowError("Closing tag is missing");
+
+                        expect(() =>
+                            p.end("<div><h1></h1 <h2></h2></div>"),
+                        ).toThrowError("Closing tag is missing");
                     });
                 });
             });
