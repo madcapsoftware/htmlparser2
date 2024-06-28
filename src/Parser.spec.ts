@@ -193,7 +193,7 @@ describe("API", () => {
                             });
 
                             expect(() => p.end("<div></aaa>")).toThrowError(
-                                "Opening and ending tag mismatch: div and aaa",
+                                "Opening and ending tag mismatch for 'div' and 'aaa'",
                             );
                         });
 
@@ -215,7 +215,7 @@ describe("API", () => {
                             });
 
                             expect(() => p.end("<div><h1></div>")).toThrowError(
-                                "Opening and ending tag mismatch: h1 and div",
+                                "Opening and ending tag mismatch for 'h1' and 'div'",
                             );
                         });
 
@@ -237,7 +237,7 @@ describe("API", () => {
                             expect(() =>
                                 p.end("<div><h1></aaa></div>"),
                             ).toThrowError(
-                                "Opening and ending tag mismatch: h1 and aaa",
+                                "Opening and ending tag mismatch for 'h1' and 'aaa'",
                             );
                         });
 
@@ -249,7 +249,7 @@ describe("API", () => {
                             expect(() =>
                                 p.end("<div><h1></h1</div>"),
                             ).toThrowError(
-                                "Opening and ending tag mismatch: h1 and h1</div",
+                                "Opening and ending tag mismatch for 'h1' and 'h1</div'",
                             );
                         });
                     });
@@ -275,7 +275,7 @@ describe("API", () => {
                             expect(() =>
                                 p.end("<div></ <h2></h2>"),
                             ).toThrowError(
-                                "Opening and ending tag mismatch: div and h2",
+                                "Opening and ending tag mismatch for 'div' and 'h2'",
                             );
                         });
 
@@ -287,7 +287,7 @@ describe("API", () => {
                             expect(() =>
                                 p.end("<div></aaa> <h2></h2>"),
                             ).toThrowError(
-                                "Opening and ending tag mismatch: div and aaa",
+                                "Opening and ending tag mismatch for 'div' and 'aaa'",
                             );
                         });
 
@@ -299,7 +299,7 @@ describe("API", () => {
                             expect(() =>
                                 p.end("<div></div <h2></h2>"),
                             ).toThrowError(
-                                "Opening and ending tag mismatch: div and div <h2",
+                                "Opening and ending tag mismatch for 'div' and 'div <h2'",
                             );
                         });
                     });
@@ -313,7 +313,7 @@ describe("API", () => {
                             expect(() =>
                                 p.end("<div><h1> <h2></h2></div>"),
                             ).toThrowError(
-                                "Opening and ending tag mismatch: h1 and div",
+                                "Opening and ending tag mismatch for 'h1' and 'div'",
                             );
                         });
 
@@ -325,7 +325,7 @@ describe("API", () => {
                             expect(() =>
                                 p.end("<div><h1></ <h2></h2></div>"),
                             ).toThrowError(
-                                "Opening and ending tag mismatch: h1 and h2",
+                                "Opening and ending tag mismatch for 'h1' and 'h2'",
                             );
                         });
 
@@ -337,7 +337,7 @@ describe("API", () => {
                             expect(() =>
                                 p.end("<div><h1></aaa> <h2></h2></div>"),
                             ).toThrowError(
-                                "Opening and ending tag mismatch: h1 and aaa",
+                                "Opening and ending tag mismatch for 'h1' and 'aaa'",
                             );
                         });
 
@@ -349,7 +349,7 @@ describe("API", () => {
                             expect(() =>
                                 p.end("<div><h1></h1 <h2></h2></div>"),
                             ).toThrowError(
-                                "Opening and ending tag mismatch: h1 and h1 <h2",
+                                "Opening and ending tag mismatch for 'h1' and 'h1 <h2'",
                             );
                         });
                     });
@@ -393,6 +393,18 @@ describe("API", () => {
 
                 expect(() => p.end("<div><br></div>")).toThrowError(
                     "Closing tag is missing",
+                );
+            });
+        });
+
+        describe("should throw when missing an opening tag", () => {
+            it("for html tag", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                });
+
+                expect(() => p.end("</html>")).toThrowError(
+                    "Opening tag is missing for 'html'",
                 );
             });
         });

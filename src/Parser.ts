@@ -316,7 +316,7 @@ export class Parser implements Callbacks {
             while (this.stack.length > 0 && impliesClose.has(this.stack[0])) {
                 if (this.strictMode) {
                     throw new Error(
-                        `Line ${this.tokenizer.line} Closing tag is missing`,
+                        `Line ${this.tokenizer.line} Closing tag is missing for '${this.stack[0]}'`,
                     );
                 }
                 const element = this.stack.shift()!;
@@ -344,7 +344,7 @@ export class Parser implements Callbacks {
         const isVoid = this.isVoidElement(this.tagname);
         if (this.strictMode && isVoid && !isSelfClosing) {
             throw new Error(
-                `Line ${this.tokenizer.line} Closing tag is missing`,
+                `Line ${this.tokenizer.line} Closing tag is missing for '${this.tagname}'`,
             );
         }
 
@@ -380,7 +380,9 @@ export class Parser implements Callbacks {
 
         if (this.strictMode && name !== this.stack[0]) {
             throw new Error(
-                `Line ${this.tokenizer.line} Opening and ending tag mismatch: ${this.stack[0]} and ${name}`,
+                this.stack[0]
+                    ? `Line ${this.tokenizer.line} Opening and ending tag mismatch for '${this.stack[0]}' and '${name}'`
+                    : `Line ${this.tokenizer.line} Opening tag is missing for '${name}'`,
             );
         }
 
@@ -398,7 +400,7 @@ export class Parser implements Callbacks {
                 for (let index = 0; index <= pos; index++) {
                     if (this.strictMode && index !== pos) {
                         throw new Error(
-                            `Line ${this.tokenizer.line} Closing tag is missing`,
+                            `Line ${this.tokenizer.line} Closing tag is missing for '${this.stack[0]}'`,
                         );
                     }
 
@@ -565,7 +567,7 @@ export class Parser implements Callbacks {
     onend(): void {
         if (this.strictMode && this.stack.length > 0) {
             throw new Error(
-                `Line ${this.tokenizer.line} Closing tag is missing`,
+                `Line ${this.tokenizer.line} Closing tag is missing for '${this.stack[0]}'`,
             );
         }
 
