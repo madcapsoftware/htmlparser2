@@ -452,5 +452,18 @@ describe("API", () => {
                 expect(() => p.end("<div><br /></div>")).not.toThrowError();
             });
         });
+
+        describe("line numbers", () => {
+            it("with only an opening tag", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                });
+
+                expect(() =>
+                    p.end(`
+                    <div>`),
+                ).toThrowError("Line 2");
+            });
+        });
     });
 });

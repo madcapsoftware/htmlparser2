@@ -159,6 +159,8 @@ export default class Tokenizer {
     public running = true;
     /** The offset of the current buffer. */
     private offset = 0;
+    /** The current line number that is being parsed. */
+    private lineNumber = 1;
 
     private readonly xmlMode: boolean;
     private readonly strictMode: boolean;
@@ -186,6 +188,10 @@ export default class Tokenizer {
         );
     }
 
+    public get line(): number {
+        return this.lineNumber;
+    }
+
     public reset(): void {
         this.state = State.Text;
         this.buffer = "";
@@ -195,6 +201,7 @@ export default class Tokenizer {
         this.currentSequence = undefined!;
         this.running = true;
         this.offset = 0;
+        this.lineNumber = 1;
     }
 
     public write(chunk: string): void {
@@ -319,7 +326,13 @@ export default class Tokenizer {
      */
     private fastForwardTo(c: number): boolean {
         while (++this.index < this.buffer.length + this.offset) {
-            if (this.buffer.charCodeAt(this.index - this.offset) === c) {
+            const nc = this.buffer.charCodeAt(this.index - this.offset);
+
+            if (nc === CharCodes.NewLine) {
+                this.lineNumber++;
+            }
+
+            if (nc === c) {
                 return true;
             }
         }
@@ -397,7 +410,7 @@ export default class Tokenizer {
                 (c === CharCodes.Lt || c === CharCodes.Amp)
             ) {
                 throw new Error(
-                    `Element name cannot include '${String.fromCharCode(c)}'`,
+                    `Line ${this.lineNumber} Element name cannot include '${String.fromCharCode(c)}'`,
                 );
             }
 
@@ -422,7 +435,7 @@ export default class Tokenizer {
     private stateInTagName(c: number): void {
         if (this.strictMode && (c === CharCodes.Lt || c === CharCodes.Amp)) {
             throw new Error(
-                `Element name cannot include '${String.fromCharCode(c)}'`,
+                `Line ${this.lineNumber} Element name cannot include '${String.fromCharCode(c)}'`,
             );
         }
 
@@ -480,7 +493,7 @@ export default class Tokenizer {
             (c === CharCodes.Lt || c === CharCodes.Amp)
         ) {
             throw new Error(
-                `Attribute name cannot include '${String.fromCharCode(c)}'`,
+                `Line ${this.lineNumber} Attribute name cannot include '${String.fromCharCode(c)}'`,
             );
         } else if (!isWhitespace(c)) {
             this.state = State.InAttributeName;
@@ -501,7 +514,7 @@ export default class Tokenizer {
     private stateInAttributeName(c: number): void {
         if (this.strictMode && (c === CharCodes.Lt || c === CharCodes.Amp)) {
             throw new Error(
-                `Attribute name cannot include '${String.fromCharCode(c)}'`,
+                `Line ${this.lineNumber} Attribute name cannot include '${String.fromCharCode(c)}'`,
             );
         }
 
@@ -516,7 +529,9 @@ export default class Tokenizer {
         if (c === CharCodes.Eq) {
             this.state = State.BeforeAttributeValue;
         } else if (this.strictMode) {
-            throw new Error("Attribute value is missing");
+            throw new Error(
+                `Line ${this.lineNumber} Attribute value is missing`,
+            );
         } else if (c === CharCodes.Slash || c === CharCodes.Gt) {
             this.cbs.onattribend(QuoteType.NoValue, this.sectionStart);
             this.sectionStart = -1;
@@ -536,7 +551,9 @@ export default class Tokenizer {
             this.state = State.InAttributeValueSq;
             this.sectionStart = this.index + 1;
         } else if (this.strictMode) {
-            throw new Error("Attribute value must be in quotes");
+            throw new Error(
+                `Line ${this.lineNumber} Attribute value must be in quotes`,
+            );
         } else if (!isWhitespace(c)) {
             this.sectionStart = this.index;
             this.state = State.InAttributeValueNq;
@@ -560,7 +577,9 @@ export default class Tokenizer {
         } else if (this.decodeEntities && c === CharCodes.Amp) {
             this.startEntity();
         } else if (this.strictMode && c === CharCodes.Lt) {
-            throw new Error("Unescaped '<' not allowed in attributes values");
+            throw new Error(
+                `Line ${this.lineNumber} Unescaped '<' not allowed in attributes values`,
+            );
         }
     }
     private stateInAttributeValueDoubleQuotes(c: number): void {
@@ -715,6 +734,11 @@ export default class Tokenizer {
     private parse() {
         while (this.shouldContinue()) {
             const c = this.buffer.charCodeAt(this.index - this.offset);
+
+            if (c === CharCodes.NewLine) {
+                this.lineNumber++;
+            }
+
             switch (this.state) {
                 case State.Text: {
                     this.stateText(c);

@@ -315,7 +315,9 @@ export class Parser implements Callbacks {
         if (impliesClose) {
             while (this.stack.length > 0 && impliesClose.has(this.stack[0])) {
                 if (this.strictMode) {
-                    throw new Error("Closing tag is missing");
+                    throw new Error(
+                        `Line ${this.tokenizer.line} Closing tag is missing`,
+                    );
                 }
                 const element = this.stack.shift()!;
                 this.cbs.onclosetag?.(element, true);
@@ -341,7 +343,9 @@ export class Parser implements Callbacks {
 
         const isVoid = this.isVoidElement(this.tagname);
         if (this.strictMode && isVoid && !isSelfClosing) {
-            throw new Error("Closing tag is missing");
+            throw new Error(
+                `Line ${this.tokenizer.line} Closing tag is missing`,
+            );
         }
 
         if (this.attribs) {
@@ -376,7 +380,7 @@ export class Parser implements Callbacks {
 
         if (this.strictMode && name !== this.stack[0]) {
             throw new Error(
-                `Opening and ending tag mismatch: ${this.stack[0]} and ${name}`,
+                `Line ${this.tokenizer.line} Opening and ending tag mismatch: ${this.stack[0]} and ${name}`,
             );
         }
 
@@ -393,7 +397,9 @@ export class Parser implements Callbacks {
             if (pos !== -1) {
                 for (let index = 0; index <= pos; index++) {
                     if (this.strictMode && index !== pos) {
-                        throw new Error("Closing tag is missing");
+                        throw new Error(
+                            `Line ${this.tokenizer.line} Closing tag is missing`,
+                        );
                     }
 
                     const element = this.stack.shift()!;
@@ -558,7 +564,9 @@ export class Parser implements Callbacks {
     /** @internal */
     onend(): void {
         if (this.strictMode && this.stack.length > 0) {
-            throw new Error("Closing tag is missing");
+            throw new Error(
+                `Line ${this.tokenizer.line} Closing tag is missing`,
+            );
         }
 
         if (this.cbs.onclosetag) {

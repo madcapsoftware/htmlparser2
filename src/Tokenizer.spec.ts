@@ -249,6 +249,93 @@ describe("Tokenizer", () => {
                 ).not.toThrowError();
             });
         });
+
+        describe("line numbers", () => {
+            describe("should include correct line number", () => {
+                it("at the start of the doc", () => {
+                    expect(() =>
+                        tokenize(
+                            `<h&tml>
+                                <body>
+                                </body>
+                                </html>`,
+                            { strictMode: true, xmlMode: true },
+                        ),
+                    ).toThrowError("Line 1");
+                });
+                it("in the middle of the doc", () => {
+                    expect(() =>
+                        tokenize(
+                            `<html>
+                                <bo&dy>
+                                </body>
+                                </html>`,
+                            { strictMode: true, xmlMode: true },
+                        ),
+                    ).toThrowError("Line 2");
+                });
+                it("at the end of the doc", () => {
+                    expect(() =>
+                        tokenize(
+                            `<html>
+                                <body>
+                                </body>
+                                <&html>`,
+                            { strictMode: true, xmlMode: true },
+                        ),
+                    ).toThrowError("Line 4");
+                });
+                it("count blank lines at the start of the doc", () => {
+                    expect(() =>
+                        tokenize(
+                            `
+                            
+                                <h&tml>
+                                <body>
+                                </body>
+                                </html>`,
+                            { strictMode: true, xmlMode: true },
+                        ),
+                    ).toThrowError("Line 3");
+                });
+
+                it("count blank lines in the middle of the doc", () => {
+                    expect(() =>
+                        tokenize(
+                            `<html>
+
+
+                                <b&ody>
+                                </body>
+                                </html>`,
+                            { strictMode: true, xmlMode: true },
+                        ),
+                    ).toThrowError("Line 4");
+                });
+
+                it("count CRLF", () => {
+                    expect(() =>
+                        tokenize(
+                            `<html>\r\n<b&ody>
+                                </body>
+                                </html>`,
+                            { strictMode: true, xmlMode: true },
+                        ),
+                    ).toThrowError("Line 2");
+                });
+
+                it("count LF", () => {
+                    expect(() =>
+                        tokenize(
+                            `<html>\n<b&ody>
+                                </body>
+                                </html>`,
+                            { strictMode: true, xmlMode: true },
+                        ),
+                    ).toThrowError("Line 2");
+                });
+            });
+        });
     });
 
     it("should not lose data when pausing", () => {
