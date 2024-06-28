@@ -162,271 +162,295 @@ describe("API", () => {
         p.done();
     });
 
-    describe("should throw when missing a closing tag", () => {
-        describe("non-void tag", () => {
-            describe("without sibling", () => {
-                describe("at end of markup", () => {
-                    it("with only an opening tag", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
+    describe("strict mode", () => {
+        describe("should throw when missing a closing tag", () => {
+            describe("non-void tag", () => {
+                describe("without sibling", () => {
+                    describe("at end of markup", () => {
+                        it("with only an opening tag", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() => p.end("<div>")).toThrowError(
+                                "Closing tag is missing",
+                            );
                         });
 
-                        expect(() => p.end("<div>")).toThrowError(
-                            "Closing tag is missing",
-                        );
+                        it("with closing tag with no name", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() => p.end("<div></")).toThrowError(
+                                "Closing tag is missing",
+                            );
+                        });
+
+                        it("with closing tag with wrong name", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() => p.end("<div></aaa>")).toThrowError(
+                                "Opening and ending tag mismatch: div and aaa",
+                            );
+                        });
+
+                        it("with closing tag missing gt", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() => p.end("<div></div")).toThrowError(
+                                "Closing tag is missing",
+                            );
+                        });
                     });
 
-                    it("with closing tag with no name", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
+                    describe("within valid parent", () => {
+                        it("with only an opening tag", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() => p.end("<div><h1></div>")).toThrowError(
+                                "Opening and ending tag mismatch: h1 and div",
+                            );
                         });
 
-                        expect(() => p.end("<div></")).toThrowError(
-                            "Closing tag is missing",
-                        );
-                    });
+                        it("with closing tag with no name", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
 
-                    it("with closing tag with wrong name", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
+                            expect(() =>
+                                p.end("<div><h1></</div>"),
+                            ).toThrowError("Closing tag is missing");
                         });
 
-                        expect(() => p.end("<div></aaa>")).toThrowError(
-                            "Closing tag is missing",
-                        );
-                    });
+                        it("with closing tag with wrong name", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
 
-                    it("with closing tag missing gt", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
+                            expect(() =>
+                                p.end("<div><h1></aaa></div>"),
+                            ).toThrowError(
+                                "Opening and ending tag mismatch: h1 and aaa",
+                            );
                         });
 
-                        expect(() => p.end("<div></div")).toThrowError(
-                            "Closing tag is missing",
-                        );
-                    });
-                });
+                        it("with closing tag missing gt", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
 
-                describe("within valid parent", () => {
-                    it("with only an opening tag", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
+                            expect(() =>
+                                p.end("<div><h1></h1</div>"),
+                            ).toThrowError(
+                                "Opening and ending tag mismatch: h1 and h1</div",
+                            );
                         });
-
-                        expect(() => p.end("<div><h1></div>")).toThrowError(
-                            "Closing tag is missing",
-                        );
-                    });
-
-                    it("with closing tag with no name", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
-                        });
-
-                        expect(() => p.end("<div><h1></</div>")).toThrowError(
-                            "Closing tag is missing",
-                        );
-                    });
-
-                    it("with closing tag with wrong name", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
-                        });
-
-                        expect(() =>
-                            p.end("<div><h1></aaa></div>"),
-                        ).toThrowError("Closing tag is missing");
-                    });
-
-                    it("with closing tag missing gt", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
-                        });
-
-                        expect(() => p.end("<div><h1></h1</div>")).toThrowError(
-                            "Closing tag is missing",
-                        );
-                    });
-                });
-            });
-
-            describe("with sibling", () => {
-                describe("at end of markup", () => {
-                    it("with only an opening tag", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
-                        });
-
-                        expect(() => p.end("<div> <h2></h2>")).toThrowError(
-                            "Closing tag is missing",
-                        );
-                    });
-
-                    it("with closing tag with no name", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
-                        });
-
-                        expect(() => p.end("<div></ <h2></h2>")).toThrowError(
-                            "Closing tag is missing",
-                        );
-                    });
-
-                    it("with closing tag with wrong name", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
-                        });
-
-                        expect(() =>
-                            p.end("<div></aaa> <h2></h2>"),
-                        ).toThrowError("Closing tag is missing");
-                    });
-
-                    it("with closing tag missing gt", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
-                        });
-
-                        expect(() =>
-                            p.end("<div></div <h2></h2>"),
-                        ).toThrowError("Closing tag is missing");
                     });
                 });
 
-                describe("within valid parent", () => {
-                    it("with only an opening tag", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
+                describe("with sibling", () => {
+                    describe("at end of markup", () => {
+                        it("with only an opening tag", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() => p.end("<div> <h2></h2>")).toThrowError(
+                                "Closing tag is missing",
+                            );
                         });
 
-                        expect(() =>
-                            p.end("<div><h1> <h2></h2></div>"),
-                        ).toThrowError("Closing tag is missing");
+                        it("with closing tag with no name", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() =>
+                                p.end("<div></ <h2></h2>"),
+                            ).toThrowError(
+                                "Opening and ending tag mismatch: div and h2",
+                            );
+                        });
+
+                        it("with closing tag with wrong name", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() =>
+                                p.end("<div></aaa> <h2></h2>"),
+                            ).toThrowError(
+                                "Opening and ending tag mismatch: div and aaa",
+                            );
+                        });
+
+                        it("with closing tag missing gt", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() =>
+                                p.end("<div></div <h2></h2>"),
+                            ).toThrowError(
+                                "Opening and ending tag mismatch: div and div <h2",
+                            );
+                        });
                     });
 
-                    it("with closing tag with no name", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
+                    describe("within valid parent", () => {
+                        it("with only an opening tag", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() =>
+                                p.end("<div><h1> <h2></h2></div>"),
+                            ).toThrowError(
+                                "Opening and ending tag mismatch: h1 and div",
+                            );
                         });
 
-                        expect(() =>
-                            p.end("<div><h1></ <h2></h2></div>"),
-                        ).toThrowError("Closing tag is missing");
-                    });
+                        it("with closing tag with no name", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
 
-                    it("with closing tag with wrong name", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
+                            expect(() =>
+                                p.end("<div><h1></ <h2></h2></div>"),
+                            ).toThrowError(
+                                "Opening and ending tag mismatch: h1 and h2",
+                            );
                         });
 
-                        expect(() =>
-                            p.end("<div><h1></aaa> <h2></h2></div>"),
-                        ).toThrowError("Closing tag is missing");
-                    });
+                        it("with closing tag with wrong name", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
 
-                    it("with closing tag missing gt", () => {
-                        const p = new Parser(null, {
-                            strictMode: true,
+                            expect(() =>
+                                p.end("<div><h1></aaa> <h2></h2></div>"),
+                            ).toThrowError(
+                                "Opening and ending tag mismatch: h1 and aaa",
+                            );
                         });
 
-                        expect(() =>
-                            p.end("<div><h1></h1 <h2></h2></div>"),
-                        ).toThrowError("Closing tag is missing");
+                        it("with closing tag missing gt", () => {
+                            const p = new Parser(null, {
+                                strictMode: true,
+                            });
+
+                            expect(() =>
+                                p.end("<div><h1></h1 <h2></h2></div>"),
+                            ).toThrowError(
+                                "Opening and ending tag mismatch: h1 and h1 <h2",
+                            );
+                        });
                     });
                 });
             });
-        });
 
-        it("for void tag", () => {
-            const p = new Parser(null, {
-                strictMode: true,
+            it("for void tag", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                });
+
+                expect(() => p.end("<img>")).toThrowError(
+                    "Closing tag is missing",
+                );
             });
 
-            expect(() => p.end("<img>")).toThrowError("Closing tag is missing");
-        });
+            it("for void tag not at end of markup", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                });
 
-        it("for void tag not at end of markup", () => {
-            const p = new Parser(null, {
-                strictMode: true,
+                expect(() => p.end("<div><img></div>")).toThrowError(
+                    "Closing tag is missing",
+                );
             });
 
-            expect(() => p.end("<div><img></div>")).toThrowError(
-                "Closing tag is missing",
-            );
-        });
+            it("for br tag", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                });
 
-        it("for br tag", () => {
-            const p = new Parser(null, {
-                strictMode: true,
+                expect(() => p.end("<br>")).toThrowError(
+                    "Closing tag is missing",
+                );
             });
 
-            expect(() => p.end("<br>")).toThrowError("Closing tag is missing");
+            it("for br tag not at end of markup", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                });
+
+                expect(() => p.end("<div><br></div>")).toThrowError(
+                    "Closing tag is missing",
+                );
+            });
         });
 
-        it("for br tag not at end of markup", () => {
-            const p = new Parser(null, {
-                strictMode: true,
+        describe("should not throw for a self closing tag", () => {
+            it("for non-void tag", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                    recognizeSelfClosing: true,
+                });
+
+                expect(() => p.end("<div />")).not.toThrowError();
             });
 
-            expect(() => p.end("<div><br></div>")).toThrowError(
-                "Closing tag is missing",
-            );
-        });
-    });
+            it("for non-void tag not at end of markup", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                    recognizeSelfClosing: true,
+                });
 
-    describe("should not throw for a self closing tag", () => {
-        it("for non-void tag", () => {
-            const p = new Parser(null, {
-                strictMode: true,
-                recognizeSelfClosing: true,
+                expect(() => p.end("<div><h1 /></div>")).not.toThrowError();
             });
 
-            expect(() => p.end("<div />")).not.toThrowError();
-        });
+            it("for void tag", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                    recognizeSelfClosing: true,
+                });
 
-        it("for non-void tag not at end of markup", () => {
-            const p = new Parser(null, {
-                strictMode: true,
-                recognizeSelfClosing: true,
+                expect(() => p.end("<img />")).not.toThrowError();
             });
 
-            expect(() => p.end("<div><h1 /></div>")).not.toThrowError();
-        });
+            it("for void tag not at end of markup", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                    recognizeSelfClosing: true,
+                });
 
-        it("for void tag", () => {
-            const p = new Parser(null, {
-                strictMode: true,
-                recognizeSelfClosing: true,
+                expect(() => p.end("<div><img /></div>")).not.toThrowError();
             });
 
-            expect(() => p.end("<img />")).not.toThrowError();
-        });
+            it("for br tag", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                    recognizeSelfClosing: true,
+                });
 
-        it("for void tag not at end of markup", () => {
-            const p = new Parser(null, {
-                strictMode: true,
-                recognizeSelfClosing: true,
+                expect(() => p.end("<br />")).not.toThrowError();
             });
 
-            expect(() => p.end("<div><img /></div>")).not.toThrowError();
-        });
+            it("for br tag not at end of markup", () => {
+                const p = new Parser(null, {
+                    strictMode: true,
+                    recognizeSelfClosing: true,
+                });
 
-        it("for br tag", () => {
-            const p = new Parser(null, {
-                strictMode: true,
-                recognizeSelfClosing: true,
+                expect(() => p.end("<div><br /></div>")).not.toThrowError();
             });
-
-            expect(() => p.end("<br />")).not.toThrowError();
-        });
-
-        it("for br tag not at end of markup", () => {
-            const p = new Parser(null, {
-                strictMode: true,
-                recognizeSelfClosing: true,
-            });
-
-            expect(() => p.end("<div><br /></div>")).not.toThrowError();
         });
     });
 });

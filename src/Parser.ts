@@ -374,6 +374,12 @@ export class Parser implements Callbacks {
             name = name.toLowerCase();
         }
 
+        if (this.strictMode && name !== this.stack[0]) {
+            throw new Error(
+                `Opening and ending tag mismatch: ${this.stack[0]} and ${name}`,
+            );
+        }
+
         if (
             this.htmlMode &&
             (foreignContextElements.has(name) ||
